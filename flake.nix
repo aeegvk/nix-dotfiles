@@ -50,15 +50,12 @@
               };
             };
 
-            # ←── Highlighted change ──────────────────────────────────────────
-            programs.fish.enable = true;    # Enable Fish support & completions
+            programs.fish.enable = true;
             programs.fish.shellInit = ''
               # add Nix single-user profile to PATH
               set -gx PATH $HOME/.nix-profile/bin $PATH
             '';
-            # ───────────────────────────────────────────────────────────────
 
-            # ←── Highlighted change (optional) ─────────────────────────────
             # Keep bash as login-shell but auto‐exec fish on interactive starts
             programs.bash.enable = true;
             programs.bash.initExtra = ''
