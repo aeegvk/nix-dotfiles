@@ -1,9 +1,10 @@
 {
-  description = "Aee’s unified Dev flake: Home-Manager + DevShells";
+  description = "Aee’s unified Dev flake: Home-Manager  DevShells";
 
   inputs = {
     # 1) Pin nixpkgs
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     # 2) Pin Home-Manager and wire it to the same nixpkgs
     home-manager = {
@@ -12,11 +13,18 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, ... }:
     let
       system = "x86_64-linux";
+
       # Import pkgs with the HM overlay and allow unfree (for Chrome, etc.)
       pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
+
+      # Allows unstable pkgs
+      unstable = import nixpkgs-unstable {
         inherit system;
         config.allowUnfree = true;
       };
@@ -35,11 +43,11 @@
             # Packages & GUI Apps
             home.packages = with pkgs; [
               noto-fonts
-              google-chrome brave zed sublime-merge dbeaver
+              google-chrome brave unstable.zed-editor sublime-merge dbeaver
               obs-studio inkscape flatpak
               git neovim fastfetch docker docker-compose
               elixir python3 nodejs yarn
-              fish
+              fish gimp
             ];
 
             # Drop your helper scripts into ~/bin
@@ -88,21 +96,31 @@
       # ───────────────────────────────────────────────────────────────────────────
       devShells.${system} = {
         default = pkgs.mkShell {
-          buildInputs = with pkgs; [elixir erlang python3 nodejs yarn docker docker-compose ];
+          buildInputs = with pkgs; [ elixir erlang python3 nodejs yarn docker docker-compose ];
+          shell = pkgs.fish;
           shellHook = ''
-            export EDITOR=zed
+            export EDITOR=zeditor
             echo "🚀 Aee’s global dev shell"
+            exec ${pkgs.fish}/bin/fish --login
           '';
         };
 
         python = pkgs.mkShell {
-          buildInputs = with pkgs; [ python3 pipenv poetry ];
-          shellHook  = "echo \"🐍 Python shell with pipenv & poetry\"";
+          shell = pkgs.fish;
+          buildInputs = with pkgs; [ python3 pipenv unstable.uv ];
+          shellHook  = ''
+            echo "🐍 Python shell with pipenv & uv"
+            exec ${pkgs.fish}/bin/fish --login
+          '';
         };
 
         node = pkgs.mkShell {
+          shell = pkgs.fish;
           buildInputs = with pkgs; [ nodejs yarn pnpm ];
-          shellHook  = "echo \"🔧 Node.js shell with Yarn & PNPM\"";
+          shellHook  = ''
+            echo "🔧 Node.js shell with Yarn & PNPM"
+            exec ${pkgs.fish}/bin/fish --login
+          '';
         };
       };
     };
