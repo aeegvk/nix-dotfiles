@@ -1,12 +1,12 @@
 {
-  description = "Aee’s unified Dev flake: Home-Manager  DevShells";
+  description = "Aee’s unified Dev flake: Home-Manager + DevShells";
 
   inputs = {
-    # 1) Pin nixpkgs
+    # Pin nixpkgs
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
-    # 2) Pin Home-Manager and wire it to the same nixpkgs
+    # Pin Home-Manager and wire it to the same nixpkgs
     home-manager = {
       url                = "github:nix-community/home-manager/release-23.11";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -23,13 +23,13 @@
         config.allowUnfree = true;
       };
 
-      # Allows unstable pkgs
+      # Enable unstable pkgs
       unstable = import nixpkgs-unstable {
         inherit system;
         config.allowUnfree = true;
       };
 
-      # Your user’s Home-Manager configuration
+      # User’s Home-Manager configuration
       hmConfig = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
 
@@ -50,7 +50,7 @@
               fish gimp
             ];
 
-            # Drop your helper scripts into ~/bin
+            # Drop helper scripts into ~/bin
             home.file = {
               "bin/install-nix.sh" = {
                 text       = builtins.readFile ./install-nix.sh;
@@ -79,20 +79,20 @@
       };
     in {
       # ───────────────────────────────────────────────────────────────────────────
-      # A) Top-level Home-Manager config for your CLI call
+      # Top-level Home-Manager config for your CLI call
       # ───────────────────────────────────────────────────────────────────────────
       homeConfigurations = {
         aee = hmConfig;
       };
 
       # ───────────────────────────────────────────────────────────────────────────
-      # B) Expose the Home-Manager CLI & packages so activation can install/remove
+      # Expose the Home-Manager CLI & packages so activation can install/remove
       # ───────────────────────────────────────────────────────────────────────────
       apps.${system}.home-manager     = pkgs.home-manager;
       packages.${system}.home-manager = pkgs.home-manager;
 
       # ───────────────────────────────────────────────────────────────────────────
-      # C) Global devShells you can `nix develop ~/dotfiles#default|python|node`
+      # Global devShells you can `nix develop ~/dotfiles#default|python|node`
       # ───────────────────────────────────────────────────────────────────────────
       devShells.${system} = {
         default = pkgs.mkShell {
