@@ -39,6 +39,7 @@
               obs-studio inkscape flatpak
               git neovim fastfetch docker docker-compose
               elixir python3 nodejs yarn
+              fish
             ];
 
             # Drop your helper scripts into ~/bin
@@ -49,12 +50,24 @@
               };
             };
 
-            # Zsh & Oh My Zsh
-            programs.zsh = {
-              enable           = true;
-              enableCompletion = true;
-              syntaxHighlighting.enable = true;
-            };
+            # ←── Highlighted change ──────────────────────────────────────────
+            programs.fish.enable = true;    # Enable Fish support & completions
+            programs.fish.shellInit = ''
+              # add Nix single-user profile to PATH
+              set -gx PATH $HOME/.nix-profile/bin $PATH
+            '';
+            # ───────────────────────────────────────────────────────────────
+
+            # ←── Highlighted change (optional) ─────────────────────────────
+            # Keep bash as login-shell but auto‐exec fish on interactive starts
+            programs.bash.enable = true;
+            programs.bash.initExtra = ''
+              if [ -n "$PS1" ] && [ -t 1 ] &&
+                  ps -o comm= -p $PPID | grep -qv fish; then
+                exec ${pkgs.fish}/bin/fish --login
+              fi
+            '';
+            # ───────────────────────────────────────────────────────────────
 
           })
         ];
@@ -76,24 +89,24 @@
       # ───────────────────────────────────────────────────────────────────────────
       # C) Global devShells you can `nix develop ~/dotfiles#default|python|node`
       # ───────────────────────────────────────────────────────────────────────────
-      devShells.${system}.default = pkgs.mkShell {
-        buildInputs = with pkgs; [
-          elixir erlang python3 nodejs yarn docker docker-compose
-        ];
-        shellHook = ''
-          export EDITOR=zed
-          echo "🚀 Aee’s global dev shell"
-        '';
-      };
+      devShells.${system} = {
+        default = pkgs.mkShell {
+          buildInputs = with pkgs; [elixir erlang python3 nodejs yarn docker docker-compose ];
+          shellHook = ''
+            export EDITOR=zed
+            echo "🚀 Aee’s global dev shell"
+          '';
+        };
 
-      devShells.${system}.python = pkgs.mkShell {
-        buildInputs = with pkgs; [ python3 pipenv poetry ];
-        shellHook  = "echo \"🐍 Python shell with pipenv & poetry\"";
-      };
+        python = pkgs.mkShell {
+          buildInputs = with pkgs; [ python3 pipenv poetry ];
+          shellHook  = "echo \"🐍 Python shell with pipenv & poetry\"";
+        };
 
-      devShells.${system}.node = pkgs.mkShell {
-        buildInputs = with pkgs; [ nodejs yarn pnpm ];
-        shellHook  = "echo \"🔧 Node.js shell with Yarn & PNPM\"";
+        node = pkgs.mkShell {
+          buildInputs = with pkgs; [ nodejs yarn pnpm ];
+          shellHook  = "echo \"🔧 Node.js shell with Yarn & PNPM\"";
+        };
       };
     };
 }
