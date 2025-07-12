@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # install-nix.sh — Installs Nix (single- or multi-user) and enables flakes.
-# Usage: ./install-nix.sh [--single|-s] [--help|-h]
-#   --single, -s   => single-user (--no-daemon)
-#   --multi,  -m   => multi-user (--daemon)  [default]
-#   --help,   -h   => show this help
+# Usage: ./install-nix.sh [--single|-s] [--multi|-m] [--determinate|-d] [--help|-h]
+#   --single, -s       => single-user (--no-daemon)
+#   --multi,  -m       => multi-user (--daemon)  [default]
+#   --determinate, -d  => use Determinate Systems installer
+#   --help,   -h       => show this help
 
 set -euo pipefail
 
@@ -12,24 +13,27 @@ show_help() {
 install-nix.sh
 
 This script installs Nix on Linux in either multi-user (daemon) mode
-or single-user mode (no-daemon, for SELinux-enabled systems).
+or single-user mode (no-daemon), and optionally via the Determinate
+Systems installer (with flakes enabled out of the box).
 
 Usage:
-  $0 [--single|-s] [--multi|-m] [--help|-h]
+  $0 [--single|-s] [--multi|-m] [--determinate|-d] [--help|-h]
 
 Options:
-  --single, -s    Single-user install (passes --no-daemon)
-  --multi,  -m    Multi-user install (passes --daemon)  [default]
-  --help,   -h    Show this help and exit
+  --single, -s       Single-user install (passes --no-daemon)
+  --multi,  -m       Multi-user install (passes --daemon)  [default]
+  --determinate, -d  Use Determinate Systems installer
+  --help,   -h       Show this help and exit
 
-By default, runs multi-user. After installation, it will also
-enable flakes in ~/.config/nix/nix.conf, reload your shell,
-and install the Home Manager CLI via flakes.
+By default, runs multi-user with the official installer.
+With --determinate it will use Determinate’s installer (and enable
+flakes by default).
 EOF
 }
 
-# Default to multi-user
+# Defaults
 INSTALL_MODE="multi"
+INSTALL_TYPE="official"             # ←── Highlighted change: default installer
 
 # Parse args
 while (( $# )); do
@@ -40,6 +44,10 @@ while (( $# )); do
       ;;
     -m|--multi)
       INSTALL_MODE="multi"
+      shift
+      ;;
+    -d|--determinate)               # ←── Highlighted change
+      INSTALL_TYPE="determinate"
       shift
       ;;
     -h|--help)
@@ -67,7 +75,7 @@ if [[ "$OS" != "Linux" ]]; then
   exit 1
 fi
 
-# 3) Determine installer flag
+# 3) Determine installer flags
 if [[ "$INSTALL_MODE" == "single" ]]; then
   INSTALL_FLAG="--no-daemon"
   echo "🚀 Installing Nix (single-user mode)…"
@@ -76,9 +84,20 @@ else
   echo "🚀 Installing Nix (multi-user daemon mode)…"
 fi
 
-# 4) Run the official installer
-curl --proto '=https' --tlsv1.2 -sSfL https://nixos.org/nix/install \
-  | sh -s -- $INSTALL_FLAG
+# 4) Run the chosen installer
+if [[ "$INSTALL_TYPE" == "determinate" ]]; then
+  echo "🔄 Using Determinate Systems installer…"
+  TMP_SCRIPT="$(mktemp)"
+  curl --proto '=https' --tlsv1.2 -sSfL https://install.determinate.systems/nix \
+    > "$TMP_SCRIPT"
+  chmod +x "$TMP_SCRIPT"
+  "$TMP_SCRIPT" install
+  rm -f "$TMP_SCRIPT"
+else
+  echo "🔄 Using official Nix installer…"
+  curl --proto '=https' --tlsv1.2 -sSfL https://nixos.org/nix/install \
+    | sh -s -- $INSTALL_FLAG
+fi
 
 # 5) Enable flakes in per-user config
 CONFIG_DIR="${HOME}/.config/nix"
@@ -122,7 +141,7 @@ echo "  • Home Manager installed into your user profile"
 # 8) Post-install instructions
 cat <<EOF
 
-✅ Nix (${INSTALL_MODE}-user) is installed and flakes are enabled!
+✅ Nix (${INSTALL_TYPE}) is installed (${INSTALL_MODE}-user) and flakes are enabled!
    Home Manager CLI is ready in your profile.
 
 Next steps:
