@@ -23,7 +23,8 @@ Options:
   --help,   -h    Show this help and exit
 
 By default, runs multi-user. After installation, it will also
-enable flakes in ~/.config/nix/nix.conf.
+enable flakes in ~/.config/nix/nix.conf, reload your shell,
+and install the Home Manager CLI via flakes.
 EOF
 }
 
@@ -97,20 +98,44 @@ else
   echo "  • Added flakes support"
 fi
 
-# 6) Post-install instructions
+# 6) Reload the shell’s Nix environment in this session
+echo "♻️  Reloading Nix profile into current shell…"
+if [[ "$INSTALL_MODE" == "single" ]]; then
+  # single-user install
+  if [ -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+    source "$HOME/.nix-profile/etc/profile.d/nix.sh"
+    echo "  • Sourced ~/.nix-profile/etc/profile.d/nix.sh"
+  fi
+else
+  # multi-user install
+  if [ -f /etc/profile.d/nix.sh ]; then
+    source /etc/profile.d/nix.sh
+    echo "  • Sourced /etc/profile.d/nix.sh"
+  fi
+fi
+
+# 7) Install Home Manager CLI via flakes
+echo "🔧 Installing Home Manager CLI via flakes…"
+nix profile add home-manager#home-manager
+echo "  • Home Manager installed into your user profile"
+
+# 8) Post-install instructions
 cat <<EOF
 
-✅ Nix installed (${INSTALL_MODE}-user) and flakes enabled!
+✅ Nix (${INSTALL_MODE}-user) is installed and flakes are enabled!
+   Home Manager CLI is ready in your profile.
 
 Next steps:
-  • Reload your shell:
-      source /etc/profile.d/nix.sh  # for multi-user
-      # or
-      . ~/.nix-profile/etc/profile.d/nix.sh  # for single-user
-
-  • Verify:
+  • Verify Nix:
       nix --version
       nix flake --help
+
+  • Verify Home Manager:
+      home-manager --version
+
+  • To start using Home Manager with your flake:
+      cd path/to/your/dotfiles
+      home-manager switch --flake .#aee
 
 Happy hacking! 🚀
 EOF
