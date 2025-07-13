@@ -43,7 +43,7 @@
             # Packages & GUI Apps
             home.packages = with pkgs; [
               noto-fonts
-              google-chrome brave unstable.zed-editor sublime-merge dbeaver
+              google-chrome unstable.brave unstable.zed-editor sublime-merge dbeaver
               obs-studio inkscape flatpak
               git neovim fastfetch docker docker-compose
               elixir python3 nodejs yarn
