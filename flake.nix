@@ -3,12 +3,12 @@
 
   inputs = {
     # Pin nixpkgs
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     # Pin Home-Manager and wire it to the same nixpkgs
     home-manager = {
-      url                = "github:nix-community/home-manager/release-23.11";
+      url                = "github:nix-community/home-manager/release-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -38,12 +38,12 @@
             # Basic user info
             home.username      = "aee";
             home.homeDirectory = "/home/aee";
-            home.stateVersion  = "23.11";
+            home.stateVersion  = "25.05";
 
             # Packages & GUI Apps
             home.packages = with pkgs; [
               noto-fonts
-              google-chrome unstable.brave unstable.zed-editor sublime-merge dbeaver
+              google-chrome brave unstable.zed-editor sublime-merge dbeaver-bin
               obs-studio inkscape flatpak
               git neovim fastfetch docker docker-compose
               elixir python3 nodejs yarn
