@@ -51,7 +51,11 @@
               "com.obsproject.Studio"
               "org.inkscape.Inkscape"
               "org.gimp.GIMP"
-              "io.dbeaver.DBeaverCommunity"
+              "org.dbgate.DbGate"
+              "com.discordapp.Discord"
+              # "io.dbeaver.DBeaverCommunity"
+              # "com.ktechpit.whatsie"
+              # "com.spotify.Client"
             ];
 
             # Packages & GUI Apps
