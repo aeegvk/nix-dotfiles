@@ -11,9 +11,12 @@
       url                = "github:nix-community/home-manager/release-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # declarative Flatpak support
+    nixflatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, nixflatpak, ... }:
     let
       system = "x86_64-linux";
 
@@ -34,20 +37,30 @@
         inherit pkgs;
 
         modules = [
+          nixflatpak.homeManagerModules.nix-flatpak
+
           ({ config, pkgs, lib, ... }: {
             # Basic user info
             home.username      = "aee";
             home.homeDirectory = "/home/aee";
             home.stateVersion  = "25.05";
 
+            # enable Flatpak & install OBS Studio as Flatpak :contentReference[oaicite:1]{index=1}
+            services.flatpak.enable   = true;
+            services.flatpak.packages = [
+              "com.obsproject.Studio"
+              "org.inkscape.Inkscape"
+              "org.gimp.GIMP"
+              "io.dbeaver.DBeaverCommunity"
+            ];
+
             # Packages & GUI Apps
             home.packages = with pkgs; [
               noto-fonts
-              google-chrome brave unstable.zed-editor sublime-merge dbeaver-bin
-              obs-studio inkscape flatpak
-              git neovim fastfetch docker docker-compose
-              elixir python3 nodejs yarn
-              fish gimp
+              google-chrome brave unstable.zed-editor
+              sublime-merge flatpak git neovim
+              fastfetch docker docker-compose
+              elixir python3 nodejs yarn fish
             ];
 
             # Drop helper scripts into ~/bin
