@@ -58,6 +58,11 @@
               };
             };
 
+            # Update XDG_DATA_DIRS to include user's nix-profile share
+            home.sessionVariables = {
+              XDG_DATA_DIRS = "$HOME/.nix-profile/share:$XDG_DATA_DIRS";
+            };
+
             programs.fish.enable = true;
             programs.fish.shellInit = ''
               # add Nix single-user profile to PATH
