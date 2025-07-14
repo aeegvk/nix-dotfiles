@@ -53,9 +53,10 @@
               "org.gimp.GIMP"
               "org.dbgate.DbGate"
               "com.discordapp.Discord"
-              # "io.dbeaver.DBeaverCommunity"
-              # "com.ktechpit.whatsie"
-              # "com.spotify.Client"
+              "org.videolan.VLC"
+              "com.ktechpit.whatsie"
+              "com.spotify.Client"
+              "com.valvesoftware.Steam"
             ];
 
             # Packages & GUI Apps
