@@ -57,13 +57,15 @@
               "com.ktechpit.whatsie"
               "com.spotify.Client"
               "com.valvesoftware.Steam"
+	      "dev.zed.Zed"
+	      "com.sublimemerge.App"
             ];
 
             # Packages & GUI Apps
             home.packages = with pkgs; [
               noto-fonts
-              google-chrome brave unstable.zed-editor
-              sublime-merge flatpak git neovim
+              google-chrome brave
+              flatpak git neovim
               fastfetch docker docker-compose
               elixir python3 nodejs yarn fish
             ];
@@ -78,7 +80,7 @@
 
             # Update XDG_DATA_DIRS to include user's nix-profile share
             home.sessionVariables = {
-              XDG_DATA_DIRS = "$HOME/.nix-profile/share:$XDG_DATA_DIRS";
+              XDG_DATA_DIRS = "$HOME/.nix-profile/share:$HOME/.local/share/flatpak/exports/share:$XDG_DATA_DIRS";
             };
 
             programs.fish.enable = true;
